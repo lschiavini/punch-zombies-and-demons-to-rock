@@ -76,15 +76,6 @@ export class Game extends Phaser.Scene
                     player.body.velocity.x = 0;
                     enemy.body.velocity.x = 0;
                 }
-                
-                // Minimal vertical separation if needed
-                if (Math.abs(dy) < 48) { // Height of sprites
-                    const verticalDirection = Math.sign(dy);
-                    const verticalCorrection = (48 - Math.abs(dy)) / 2;
-                    player.y += verticalCorrection * verticalDirection;
-                    enemy.y -= verticalCorrection * verticalDirection;
-                }
-                
                 return true;
             },
             this
