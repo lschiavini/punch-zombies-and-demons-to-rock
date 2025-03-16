@@ -51,8 +51,9 @@ export class Game extends Phaser.Scene
         this.physics.add.collider(this.player.sprite, this.walls);
         this.physics.add.collider(this.enemies, this.walls);
         this.physics.add.collider(this.enemies, this.enemies);
+        this.physics.add.collider(this.player.sprite, this.enemies);
         
-        // Add collision between player and enemies
+        // Add overlap for damage handling
         this.physics.add.overlap(
             this.player.sprite,
             this.enemies,

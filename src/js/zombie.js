@@ -18,23 +18,33 @@ export class Zombie {
         this.health = 2;
         this.isStunned = false;
         this.STUN_DURATION = 500; // ms
+        this.MIN_DISTANCE = 30; // Minimum distance to maintain from player
     }
 
     update(player) {
         if (!this.sprite.active || this.isStunned) return;
 
-        // Simple follow behavior
-        const direction = player.x > this.sprite.x ? 1 : -1;
-        this.sprite.body.setVelocityX(this.speed * direction);
-        this.sprite.scaleX = direction;
+        // Calculate distance to player
+        const dx = player.x - this.sprite.x;
+        const distance = Math.abs(dx);
+        
+        // Only move if we're further than the minimum distance
+        if (distance > this.MIN_DISTANCE) {
+            const direction = dx > 0 ? 1 : -1;
+            this.sprite.body.setVelocityX(this.speed * direction);
+            this.sprite.scaleX = direction;
 
-        // Flip animation when changing direction
-        if (this.sprite.scaleX !== direction) {
-            this.scene.tweens.add({
-                targets: this.sprite,
-                scaleX: direction,
-                duration: 100
-            });
+            // Flip animation when changing direction
+            if (this.sprite.scaleX !== direction) {
+                this.scene.tweens.add({
+                    targets: this.sprite,
+                    scaleX: direction,
+                    duration: 100
+                });
+            }
+        } else {
+            // Stop if we're at the minimum distance
+            this.sprite.body.setVelocityX(0);
         }
     }
 
