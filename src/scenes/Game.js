@@ -66,90 +66,36 @@ export class Game extends Phaser.Scene
     });
     }
 
-    movePlayerMobile () {
-        // Create mobile control buttons
-        const buttonLeft = this.add.image(0, 0, 'button');
-        const buttonRight = this.add.image(140, 0, 'button');
-        const buttonJump = this.add.image(1400, 800, 'button');
-        const buttonPunch = this.add.image(1300, 900, 'button');
-        const buttonStrongAttack = this.add.image(1400, 900, 'button');
-        const buttonSpecialItem = this.add.image(1500, 900, 'button');
-
-        // Group movement buttons
-        const directionButtons = this.add.container(50, 900, [buttonLeft, buttonRight]);
-
-        // Make all buttons interactive
-        buttonLeft.setInteractive();
-        buttonRight.setInteractive();
-        buttonJump.setInteractive();
-        buttonPunch.setInteractive();
-        buttonStrongAttack.setInteractive();
-        buttonSpecialItem.setInteractive();
+    movePlayerMobile() {
+        // Create mobile control buttons with adjusted positions (assuming 800x600 canvas)
+        const buttonLeft = this.add.image(50, 500, 'button').setInteractive();
+        const buttonRight = this.add.image(190, 500, 'button').setInteractive();
+        const buttonJump = this.add.image(700, 400, 'button').setInteractive();
+        const buttonPunch = this.add.image(600, 500, 'button').setInteractive();
+        const buttonStrongAttack = this.add.image(700, 500, 'button').setInteractive();
+        const buttonSpecialItem = this.add.image(750, 500, 'button').setInteractive();
 
         // Movement controls
-        buttonLeft.on('pointerdown', () => {
-            this.keys.left.isDown = true;
-        });
-        buttonLeft.on('pointerup', () => {
-            this.keys.left.isDown = false;
-        });
-
-        buttonRight.on('pointerdown', () => {
-            this.keys.right.isDown = true;
-        });
-        buttonRight.on('pointerup', () => {
-            this.keys.right.isDown = false;
-        });
+        buttonLeft.on('pointerdown', () => { this.mobileInput.left = true; });
+        buttonLeft.on('pointerup', () => { this.mobileInput.left = false; });
+        buttonRight.on('pointerdown', () => { this.mobileInput.right = true; });
+        buttonRight.on('pointerup', () => { this.mobileInput.right = false; });
 
         // Action controls
-        buttonJump.on('pointerdown', () => {
-            this.keys.jump.isDown = true;
-        });
-        buttonJump.on('pointerup', () => {
-            this.keys.jump.isDown = false;
-        });
+        buttonJump.on('pointerdown', () => { this.mobileInput.jump = true; });
+        buttonJump.on('pointerup', () => { this.mobileInput.jump = false; });
+        buttonPunch.on('pointerdown', () => { this.mobileInput.punch = true; });
+        buttonPunch.on('pointerup', () => { this.mobileInput.punch = false; });
+        buttonStrongAttack.on('pointerdown', () => { this.mobileInput.strongAttack = true; });
+        buttonStrongAttack.on('pointerup', () => { this.mobileInput.strongAttack = false; });
+        buttonSpecialItem.on('pointerdown', () => { this.mobileInput.specialItem = true; });
+        buttonSpecialItem.on('pointerup', () => { this.mobileInput.specialItem = false; });
 
-        buttonPunch.on('pointerdown', () => {
-            this.keys.punch.isDown = true;
-        });
-        buttonPunch.on('pointerup', () => {
-            this.keys.punch.isDown = false;
-        });
-
-        buttonStrongAttack.on('pointerdown', () => {
-            this.keys.strongAttack.isDown = true;
-        });
-        buttonStrongAttack.on('pointerup', () => {
-            this.keys.strongAttack.isDown = false;
-        });
-
-        buttonSpecialItem.on('pointerdown', () => {
-            this.keys.specialItem.isDown = true;
-        });
-        buttonSpecialItem.on('pointerup', () => {
-            this.keys.specialItem.isDown = false;
-        });
-
-        // Enable multi-touch
-        this.input.addPointer(3); // Support up to 4 simultaneous touches
-        directionButtons.on('pointerdown', () => {
-            this.keys.left.isDown = true;
-        });
-        directionButtons.on('pointerup', () => {
-            this.keys.left.isDown = false;
-        });
-
-        directionButtons.on('pointerdown', () => {
-            this.keys.right.isDown = true;
-        });
-        directionButtons.on('pointerup', () => {
-            this.keys.right.isDown = false;
-        });
-
+        // Enable multi-touch (support up to 4 touches)
+        this.input.addPointer(3);
     }
 
-    create ()
-    {
+    create () {
         console.log('Game scene created');
         // Create the bordered level
         this.createWorld();
@@ -181,24 +127,8 @@ export class Game extends Phaser.Scene
                 strongAttack: false,
                 specialItem: false
             };
-            this.movePlayerMobile = () => {
-                // Assuming you have buttons like buttonLeft, buttonRight, etc.
-                buttonLeft.on('pointerdown', () => { this.mobileInput.left = true; });
-                buttonLeft.on('pointerup', () => { this.mobileInput.left = false; });
-                buttonRight.on('pointerdown', () => { this.mobileInput.right = true; });
-                buttonRight.on('pointerup', () => { this.mobileInput.right = false; });
-                // Add similar handlers for jump, punch, etc.
-                buttonJump.on('pointerdown', () => { this.mobileInput.jump = true; });
-                buttonJump.on('pointerup', () => { this.mobileInput.jump = false; });
-                buttonPunch.on('pointerdown', () => { this.mobileInput.punch = true; });
-                buttonPunch.on('pointerup', () => { this.mobileInput.punch = false; });
-                buttonStrongAttack.on('pointerdown', () => { this.mobileInput.strongAttack = true; });
-                buttonStrongAttack.on('pointerup', () => { this.mobileInput.strongAttack = false; });
-                buttonSpecialItem.on('pointerdown', () => { this.mobileInput.specialItem = true; });
-                buttonSpecialItem.on('pointerup', () => { this.mobileInput.specialItem = false; });
-            };
             this.movePlayerMobile();
-            } else {
+        } else {
             this.mobileInput = null;
         }
 
