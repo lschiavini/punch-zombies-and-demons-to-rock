@@ -40,6 +40,10 @@ export class Player {
         this.healthText.setScrollFactor(0); // Makes the text follow the camera
     }
 
+    getHealth() {
+        return this.health;
+    }
+
     update(inputState, time) {
         if (!this.sprite.active) return;
 
@@ -242,22 +246,7 @@ export class Player {
             duration: 500,
             ease: 'Power2',
             onComplete: () => {
-                this.sprite.setActive(false);
-                // Show game over text
-                const centerX = this.scene.cameras.main.centerX;
-                const centerY = this.scene.cameras.main.centerY;
-                const gameOverText = this.scene.add.text(centerX, centerY, 'Game Over\nPress R to restart', {
-                    fontSize: '48px',
-                    fill: '#fff',
-                    align: 'center'
-                }).setOrigin(0.5);
 
-                gameOverText.setScrollFactor(0); // Makes the text follow the camera
-
-                // Add key listener for restart
-                this.scene.input.keyboard.once('keydown-R', () => {
-                    this.scene.scene.restart();
-                });
             }
         });
     }

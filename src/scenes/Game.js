@@ -14,6 +14,7 @@ export class Game extends Phaser.Scene
         this.maxFloors = 10;
         this.levelWidth = 5000; // Changed from 780 to 2000 for a wider level
         this.levelHeight = 200; // Slightly less than game height
+        this.enemiesKilled = 0; 
         this.inputState = {
             left: false,
             right: false,
@@ -198,6 +199,43 @@ export class Game extends Phaser.Scene
             null,
             this
         );
+
+         // Create the door
+        this.door = this.add.rectangle(this.levelWidth - 100, 300, 50, 100, 0x8B4513);
+        this.physics.add.existing(this.door, true);
+        // Add collision detection between player and door
+        this.physics.add.overlap(
+            this.player.sprite,
+            this.door,
+            this.handleDoorCollision,
+            null,
+            this
+        );
+    }
+
+    // Add this new method
+    handleDoorCollision() {
+        // Only show the message once
+        if (!this.levelComplete) {
+            this.levelComplete = true;
+
+
+            // Create completion text
+            const completionText = this.add.text(400, 300,
+                `You killed ${this.enemiesKilled} ${this.enemiesKilled > 1? 'enemies' : 'enemy'}! Congrats!`, {
+                fontSize: '32px',
+                fill: '#fff',
+                backgroundColor: '#000',
+                padding: { x: 20, y: 10 }
+            });
+            completionText.setScrollFactor(0);
+            completionText.setOrigin(0.5);
+
+            // Optional: Make the text disappear after a few seconds
+            this.time.delayedCall(3000, () => {
+                completionText.destroy();
+            });
+        }
     }
 
     createWorld() {
@@ -232,6 +270,14 @@ export class Game extends Phaser.Scene
         });
         floorText.setScrollFactor(0); // Makes the text follow the camera
 
+        // Create completion text
+        this.enemiesText = this.add.text(16, 70,
+            '', {
+                fontSize: '24px',
+                fill: '#fff',
+            });
+        this.enemiesText.setScrollFactor(0);
+
     }
 
     createEnemies() {
@@ -239,7 +285,7 @@ export class Game extends Phaser.Scene
         const sizeOfEnemy = -32; // Adjusts enemy position upward
         const y = maxY + sizeOfEnemy; // 348, consistent with original placement
 
-        for (let i = 0; i < 9; i++) {
+        for (let i = 0; i < 18; i++) {
             const x = 200 + (i * 200); // Enemies at x=200, 400, 600, ..., 1800
             const zombie = new Zombie(this, x, y);
             this.enemies.add(zombie.sprite);
@@ -249,12 +295,11 @@ export class Game extends Phaser.Scene
     handlePlayerAttack(hitbox, enemy) {
         if (this.player.isAttacking && enemy.zombieInstance) {
             enemy.zombieInstance.damage();
-        }
-    }
-
-    handlePlayerEnemyCollision(playerSprite, enemy) {
-        if (enemy.zombieInstance && !this.player.isInvulnerable) {
-            this.player.damage(10);
+            // Increment kill count when enemy is destroyed
+            if (enemy.zombieInstance.health <= 0) {
+                this.enemiesKilled++;
+                enemy.destroy(); // Add this line to remove the dead enemy
+            }
         }
     }
 
@@ -300,6 +345,35 @@ export class Game extends Phaser.Scene
                 zombie.update(this.player);
             }
         }
+
+        if (this.enemiesText) {
+            this.enemiesText.setText(`Killed: ${this.enemiesKilled}`);
+        }
+
+
+        const currentHealth = this.player.getHealth();
+        if(currentHealth <= 0) {
+            this.gameOver();
+        }
         // this.playerPosText.setText(`X: ${Math.round(this.player.sprite.x)}`);
+    }
+
+    gameOver() {
+        this.player.sprite.setActive(false);
+        // Show game over text
+        const centerX = this.cameras.main.centerX;
+        const centerY = this.cameras.main.centerY;
+        const gameOverText = this.add.text(centerX, centerY, 'Game Over\nPress R to restart', {
+            fontSize: '48px',
+            fill: '#fff',
+            align: 'center'
+        }).setOrigin(0.5);
+
+        gameOverText.setScrollFactor(0); // Makes the text follow the camera
+
+        // Add key listener for restart
+        this.input.keyboard.once('keydown-R', () => {
+            this.scene.restart();
+        });
     }
 }
