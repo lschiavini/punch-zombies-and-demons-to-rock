@@ -54,7 +54,7 @@ export class Game extends Phaser.Scene
             const y = this.cameras.main.height - buttonSize - padding;
             
             // Left button
-            const leftBtn = this.add.circle(padding + buttonSize/2, y, buttonSize/2, 0x888888, 0.5)
+            const leftBtn = this.add.circle(-padding - buttonSize/2, y, buttonSize/2, 0x888888, 0.5)
                 .setScrollFactor(0)
                 .setInteractive();
             leftBtn.on('pointerdown', () => { this.keys.left.isDown = true; });
@@ -62,7 +62,7 @@ export class Game extends Phaser.Scene
             leftBtn.on('pointerout', () => { this.keys.left.isDown = false; });
             
             // Right button
-            const rightBtn = this.add.circle(padding + buttonSize*1.75, y, buttonSize/2, 0x888888, 0.5)
+            const rightBtn = this.add.circle(-padding - buttonSize*1.75, y, buttonSize/2, 0x888888, 0.5)
                 .setScrollFactor(0)
                 .setInteractive();
             rightBtn.on('pointerdown', () => { this.keys.right.isDown = true; });
@@ -70,21 +70,23 @@ export class Game extends Phaser.Scene
             rightBtn.on('pointerout', () => { this.keys.right.isDown = false; });
 
             // Jump button
-            const jumpBtn = this.add.circle(this.cameras.main.width - padding - buttonSize*2.5, y, buttonSize/2, 0x888888, 0.5)
+            const jumpBtn = this.add.circle(this.cameras.main.width + padding + buttonSize*2.5, y, buttonSize/2, 0x888888, 0.5)
                 .setScrollFactor(0)
                 .setInteractive();
             jumpBtn.on('pointerdown', () => { this.keys.jump.isDown = true; });
             jumpBtn.on('pointerup', () => { this.keys.jump.isDown = false; });
             jumpBtn.on('pointerout', () => { this.keys.jump.isDown = false; });
 
-            // Attack button
-            const attackBtn = this.add.circle(this.cameras.main.width - padding - buttonSize*1.25, y, buttonSize/2, 0x888888, 0.5)
+            // Attack button  
+            const attackBtn = this.add.circle(this.cameras.main.width + padding + buttonSize*1.25, y, buttonSize/2, 0x888888, 0.5)
                 .setScrollFactor(0)
                 .setInteractive();
             attackBtn.on('pointerdown', () => { this.keys.punch.isDown = true; });
             attackBtn.on('pointerup', () => { this.keys.punch.isDown = false; });
             attackBtn.on('pointerout', () => { this.keys.punch.isDown = false; });
-        }
+
+            // Enable multi-touch
+            this.input.addPointer(3); // Support up to 4 simultaneous touches
 
         // Add colliders
         this.physics.add.collider(this.player.sprite, this.walls);
