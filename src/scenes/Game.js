@@ -16,8 +16,100 @@ export class Game extends Phaser.Scene
         this.levelHeight = 200; // Slightly less than game height
     }
 
+    movePlayerMobile () {
+        // Create mobile control buttons
+        const buttonLeft = this.add.image(0, 0, 'button');
+        const buttonRight = this.add.image(140, 0, 'button');
+        const buttonJump = this.add.image(1400, 800, 'button');
+        const buttonPunch = this.add.image(1300, 900, 'button');
+        const buttonStrongAttack = this.add.image(1400, 900, 'button');
+        const buttonSpecialItem = this.add.image(1500, 900, 'button');
+
+        // Group movement buttons
+        const directionButtons = this.add.container(50, 900, [buttonLeft, buttonRight]);
+
+        // Make all buttons interactive
+        buttonLeft.setInteractive();
+        buttonRight.setInteractive();
+        buttonJump.setInteractive();
+        buttonPunch.setInteractive();
+        buttonStrongAttack.setInteractive();
+        buttonSpecialItem.setInteractive();
+
+        // Movement controls
+        buttonLeft.on('pointerdown', () => {
+            this.keys.left.isDown = true;
+        });
+        buttonLeft.on('pointerup', () => {
+            this.keys.left.isDown = false;
+        });
+
+        buttonRight.on('pointerdown', () => {
+            this.keys.right.isDown = true;
+        });
+        buttonRight.on('pointerup', () => {
+            this.keys.right.isDown = false;
+        });
+
+        // Action controls
+        buttonJump.on('pointerdown', () => {
+            this.keys.jump.isDown = true;
+        });
+        buttonJump.on('pointerup', () => {
+            this.keys.jump.isDown = false;
+        });
+
+        buttonPunch.on('pointerdown', () => {
+            this.keys.punch.isDown = true;
+        });
+        buttonPunch.on('pointerup', () => {
+            this.keys.punch.isDown = false;
+        });
+
+        buttonStrongAttack.on('pointerdown', () => {
+            this.keys.strongAttack.isDown = true;
+        });
+        buttonStrongAttack.on('pointerup', () => {
+            this.keys.strongAttack.isDown = false;
+        });
+
+        buttonSpecialItem.on('pointerdown', () => {
+            this.keys.specialItem.isDown = true;
+        });
+        buttonSpecialItem.on('pointerup', () => {
+            this.keys.specialItem.isDown = false;
+        });
+
+        // Enable multi-touch
+        this.input.addPointer(3); // Support up to 4 simultaneous touches
+        movementButtons.on('pointerdown', () => {
+            this.keys.left.isDown = true;
+        });
+        movementButtons.on('pointerup', () => {
+            this.keys.left.isDown = false;
+        });
+
+        movementButtons.on('pointerdown', () => {
+            this.keys.right.isDown = true;
+        });
+        movementButtons.on('pointerup', () => {
+            this.keys.right.isDown = false;
+        });
+
+        movementButtons.on('pointerdown', () => {
+            this.keys.jump.isDown = true;
+        });
+        movementButtons.on('pointerup', () => {
+            this.keys.jump.isDown = false;
+        });
+
+
+        
+    }
+
     create ()
     {
+        const pad = Phaser.Input.Gamepad.Gamepad;
         console.log('Game scene created');
         // Create the bordered level
         this.createWorld();
@@ -46,47 +138,29 @@ export class Game extends Phaser.Scene
             specialItem: this.input.keyboard.addKey('L')
         };
 
+        // Setup gamepad input
+        this.input.gamepad.on('connected', (pad) => {
+            this.gamepad = pad;
+            console.log('Gamepad connected:', pad.id);
+        });
+
+        // Create virtual keys for gamepad that can be checked like keyboard keys
+        this.gamepadKeys = {
+            up: { isDown: false },
+            down: { isDown: false }, 
+            left: { isDown: false },
+            right: { isDown: false },
+            jump: { isDown: false },     // A button
+            punch: { isDown: false },    // X button
+            strongAttack: { isDown: false }, // Y button
+            specialItem: { isDown: false }   // B button
+        };
+
         // Add mobile controls if on touch device
         if (this.sys.game.device.input.touch) {
-            // Create movement buttons
-            const buttonSize = 64;
-            const padding = 20;
-            const y = this.cameras.main.height - buttonSize - padding;
-            
-            // Left button
-            const leftBtn = this.add.circle(-padding - buttonSize/2, y, buttonSize/2, 0x888888, 0.5)
-                .setScrollFactor(0)
-                .setInteractive();
-            leftBtn.on('pointerdown', () => { this.keys.left.isDown = true; });
-            leftBtn.on('pointerup', () => { this.keys.left.isDown = false; });
-            leftBtn.on('pointerout', () => { this.keys.left.isDown = false; });
-            
-            // Right button
-            const rightBtn = this.add.circle(-padding - buttonSize*1.75, y, buttonSize/2, 0x888888, 0.5)
-                .setScrollFactor(0)
-                .setInteractive();
-            rightBtn.on('pointerdown', () => { this.keys.right.isDown = true; });
-            rightBtn.on('pointerup', () => { this.keys.right.isDown = false; });
-            rightBtn.on('pointerout', () => { this.keys.right.isDown = false; });
+            this.movePlayerMobile();
 
-            // Jump button
-            const jumpBtn = this.add.circle(this.cameras.main.width + padding + buttonSize*2.5, y, buttonSize/2, 0x888888, 0.5)
-                .setScrollFactor(0)
-                .setInteractive();
-            jumpBtn.on('pointerdown', () => { this.keys.jump.isDown = true; });
-            jumpBtn.on('pointerup', () => { this.keys.jump.isDown = false; });
-            jumpBtn.on('pointerout', () => { this.keys.jump.isDown = false; });
-
-            // Attack button  
-            const attackBtn = this.add.circle(this.cameras.main.width + padding + buttonSize*1.25, y, buttonSize/2, 0x888888, 0.5)
-                .setScrollFactor(0)
-                .setInteractive();
-            attackBtn.on('pointerdown', () => { this.keys.punch.isDown = true; });
-            attackBtn.on('pointerup', () => { this.keys.punch.isDown = false; });
-            attackBtn.on('pointerout', () => { this.keys.punch.isDown = false; });
-
-            // Enable multi-touch
-            this.input.addPointer(3); // Support up to 4 simultaneous touches
+        }
 
         // Add colliders
         this.physics.add.collider(this.player.sprite, this.walls);
