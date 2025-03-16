@@ -84,7 +84,6 @@ export class Zombie {
     
         // Check if player is within strike range
         if (distance <= STRIKE_RANGE) {
-            console.log('Zombie attacks player within strike range');
             player.damage(this.attackDamage); // Directly apply damage to the player
         }
     

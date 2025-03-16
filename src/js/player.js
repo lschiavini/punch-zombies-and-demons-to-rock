@@ -36,6 +36,8 @@ export class Player {
             fontSize: '24px',
             fill: '#fff'
         });
+
+        this.healthText.setScrollFactor(0); // Makes the text follow the camera
     }
 
     update(inputState, time) {
@@ -244,11 +246,13 @@ export class Player {
                 // Show game over text
                 const centerX = this.scene.cameras.main.centerX;
                 const centerY = this.scene.cameras.main.centerY;
-                this.scene.add.text(centerX, centerY, 'Game Over\nPress R to restart', {
+                const gameOverText = this.scene.add.text(centerX, centerY, 'Game Over\nPress R to restart', {
                     fontSize: '48px',
                     fill: '#fff',
                     align: 'center'
                 }).setOrigin(0.5);
+
+                gameOverText.setScrollFactor(0); // Makes the text follow the camera
 
                 // Add key listener for restart
                 this.scene.input.keyboard.once('keydown-R', () => {

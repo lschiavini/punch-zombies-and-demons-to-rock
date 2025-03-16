@@ -12,7 +12,7 @@ export class Game extends Phaser.Scene
     init() {
         this.currentFloor = 1;
         this.maxFloors = 10;
-        this.levelWidth = 780;  // Slightly less than game width
+        this.levelWidth = 5000; // Changed from 780 to 2000 for a wider level
         this.levelHeight = 200; // Slightly less than game height
         this.inputState = {
             left: false,
@@ -55,7 +55,6 @@ export class Game extends Phaser.Scene
          // Handle gamepad connection
          this.input.gamepad.on('connected', (pad) => {
              this.gamepad = pad;
-             console.log('Gamepad connected:', pad.id);
          });
 
          // Handle gamepad disconnection
@@ -106,12 +105,18 @@ export class Game extends Phaser.Scene
     }
 
     create () {
-        console.log('Game scene created');
         // Create the bordered level
         this.createWorld();
 
         // Create the player
         this.player = new Player(this, 100, this.levelHeight + 150);
+
+        // // New player position text, placed below floor text
+        // this.playerPosText = this.add.text(16, 60, `X: ${Math.round(this.player.sprite.x)}`, {
+        //     fontSize: '32px',
+        //     fill: '#fff'
+        // });
+        // this.playerPosText.setScrollFactor(0);
 
         // Create enemies group
         this.enemies = this.add.group();
@@ -119,7 +124,7 @@ export class Game extends Phaser.Scene
 
         // Setup camera
         this.cameras.main.startFollow(this.player.sprite);
-        this.cameras.main.setBounds(0, 0, 800, 600);
+        this.cameras.main.setBounds(0, 0, this.levelWidth, 600); // Updated bounds to 2000 width
 
         // Setup input
         this.movePlayerDesktop();
@@ -196,6 +201,8 @@ export class Game extends Phaser.Scene
     }
 
     createWorld() {
+        // Set world bounds
+        this.physics.world.setBounds(0, 0, this.levelWidth, 600);
         // Create the walls group
         this.walls = this.physics.add.staticGroup();
 
@@ -204,13 +211,13 @@ export class Game extends Phaser.Scene
         const wallColor = 0x0000ff;
 
         // Top wall
-        this.walls.add(this.add.rectangle(400, 200, this.levelWidth, wallThickness, wallColor));
+        this.walls.add(this.add.rectangle(this.levelWidth / 2, 200, this.levelWidth, wallThickness, wallColor));
         // Bottom wall
-        this.walls.add(this.add.rectangle(400, 400, this.levelWidth, wallThickness, wallColor));
-        // Left wall
-        this.walls.add(this.add.rectangle(400 - this.levelWidth/2, 300, wallThickness, 200, wallColor));
-        // Right wall
-        this.walls.add(this.add.rectangle(400 + this.levelWidth/2, 300, wallThickness, 200, wallColor));
+        this.walls.add(this.add.rectangle(this.levelWidth / 2, 400, this.levelWidth, wallThickness, wallColor));
+        // Left wall (corrected to x = 5)
+        this.walls.add(this.add.rectangle(5, 300, wallThickness, 200, wallColor));
+        // Right wall (already at x = 4995)
+        this.walls.add(this.add.rectangle(this.levelWidth - 5, 300, wallThickness, 200, wallColor));
 
         // Make walls solid
         for (const wall of this.walls.getChildren()) {
@@ -219,37 +226,34 @@ export class Game extends Phaser.Scene
         }
 
         // Add floor number text
-        this.add.text(16, 16, `Floor ${this.currentFloor}/${this.maxFloors}`, {
+        const floorText = this.add.text(16, 16, `Floor ${this.currentFloor}/${this.maxFloors}`, {
             fontSize: '32px',
             fill: '#fff'
         });
+        floorText.setScrollFactor(0); // Makes the text follow the camera
+
     }
 
     createEnemies() {
-        // Create 3 enemies starting from x=150
-        for (let i = 0; i < 3; i++) {
-            const x = 450 + (i * 100); // Space enemies 100px apart starting at x=150
-            const maxY = 400 - 20; // Bottom wall y position minus margin
-            const sizeOfEnemy = -32;
-            const y = maxY + sizeOfEnemy; // Place enemies on the ground
-            
+        const maxY = 400 - 20; // 380, just above the bottom wall
+        const sizeOfEnemy = -32; // Adjusts enemy position upward
+        const y = maxY + sizeOfEnemy; // 348, consistent with original placement
+
+        for (let i = 0; i < 9; i++) {
+            const x = 200 + (i * 200); // Enemies at x=200, 400, 600, ..., 1800
             const zombie = new Zombie(this, x, y);
             this.enemies.add(zombie.sprite);
         }
     }
 
     handlePlayerAttack(hitbox, enemy) {
-        console.log('Overlap detected with enemy');
         if (this.player.isAttacking && enemy.zombieInstance) {
-            console.log('Applying damage to zombie');
             enemy.zombieInstance.damage();
         }
     }
 
     handlePlayerEnemyCollision(playerSprite, enemy) {
-        console.log('Collision detected with player');
         if (enemy.zombieInstance && !this.player.isInvulnerable) {
-            console.log('Applying damage to player');
             this.player.damage(10);
         }
     }
@@ -296,5 +300,6 @@ export class Game extends Phaser.Scene
                 zombie.update(this.player);
             }
         }
+        // this.playerPosText.setText(`X: ${Math.round(this.player.sprite.x)}`);
     }
 }
