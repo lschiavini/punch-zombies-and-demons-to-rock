@@ -14,6 +14,56 @@ export class Game extends Phaser.Scene
         this.maxFloors = 10;
         this.levelWidth = 780;  // Slightly less than game width
         this.levelHeight = 200; // Slightly less than game height
+        this.inputState = {
+            left: false,
+            right: false,
+            up: false,
+            down: false,
+            jump: false,
+            punch: false,
+            strongAttack: false,
+            specialItem: false
+        };
+    }
+
+    movePlayerDesktop () {
+        this.keys = {
+            up: this.input.keyboard.addKey('W'),
+            down: this.input.keyboard.addKey('S'),
+            left: this.input.keyboard.addKey('A'),
+            right: this.input.keyboard.addKey('D'),
+            jump: this.input.keyboard.addKey('SPACE'),
+            punch: this.input.keyboard.addKey('J'),
+            strongAttack: this.input.keyboard.addKey('K'),
+            specialItem: this.input.keyboard.addKey('L')
+        };
+    }
+
+    movePlayerGamepad () {
+       // Initialize virtual keys for gamepad
+    this.gamepadKeys = {
+        up: { isDown: false },
+        down: { isDown: false },
+        left: { isDown: false },
+        right: { isDown: false },
+        jump: { isDown: false },      // A button
+        punch: { isDown: false },     // X button
+        strongAttack: { isDown: false }, // Y button
+        specialItem: { isDown: false }   // B button
+    };
+
+    // Handle gamepad connection
+    this.input.gamepad.on('connected', (pad) => {
+        this.gamepad = pad;
+        console.log('Gamepad connected:', pad.id);
+    });
+
+    // Handle gamepad disconnection
+    this.input.gamepad.on('disconnected', (pad) => {
+        if (this.gamepad === pad) {
+            this.gamepad = null;
+        }
+    });
     }
 
     movePlayerMobile () {
@@ -103,13 +153,10 @@ export class Game extends Phaser.Scene
             this.keys.jump.isDown = false;
         });
 
-
-        
     }
 
     create ()
     {
-        const pad = Phaser.Input.Gamepad.Gamepad;
         console.log('Game scene created');
         // Create the bordered level
         this.createWorld();
@@ -124,42 +171,42 @@ export class Game extends Phaser.Scene
         // Setup camera
         this.cameras.main.startFollow(this.player.sprite);
         this.cameras.main.setBounds(0, 0, 800, 600);
+
         // Setup input
-        this.keys = {
-            // Movement
-            up: this.input.keyboard.addKey('W'),
-            down: this.input.keyboard.addKey('S'),
-            left: this.input.keyboard.addKey('A'),
-            right: this.input.keyboard.addKey('D'),
-            // Actions
-            jump: this.input.keyboard.addKey('SPACE'),
-            punch: this.input.keyboard.addKey('J'),
-            strongAttack: this.input.keyboard.addKey('K'),
-            specialItem: this.input.keyboard.addKey('L')
-        };
-
-        // Setup gamepad input
-        this.input.gamepad.on('connected', (pad) => {
-            this.gamepad = pad;
-            console.log('Gamepad connected:', pad.id);
-        });
-
-        // Create virtual keys for gamepad that can be checked like keyboard keys
-        this.gamepadKeys = {
-            up: { isDown: false },
-            down: { isDown: false }, 
-            left: { isDown: false },
-            right: { isDown: false },
-            jump: { isDown: false },     // A button
-            punch: { isDown: false },    // X button
-            strongAttack: { isDown: false }, // Y button
-            specialItem: { isDown: false }   // B button
-        };
+        this.movePlayerDesktop();
+        this.movePlayerGamepad();
 
         // Add mobile controls if on touch device
         if (this.sys.game.device.input.touch) {
+            this.mobileInput = {
+                left: false,
+                right: false,
+                up: false,
+                down: false,
+                jump: false,
+                punch: false,
+                strongAttack: false,
+                specialItem: false
+            };
+            this.movePlayerMobile = () => {
+                // Assuming you have buttons like buttonLeft, buttonRight, etc.
+                buttonLeft.on('pointerdown', () => { this.mobileInput.left = true; });
+                buttonLeft.on('pointerup', () => { this.mobileInput.left = false; });
+                buttonRight.on('pointerdown', () => { this.mobileInput.right = true; });
+                buttonRight.on('pointerup', () => { this.mobileInput.right = false; });
+                // Add similar handlers for jump, punch, etc.
+                buttonJump.on('pointerdown', () => { this.mobileInput.jump = true; });
+                buttonJump.on('pointerup', () => { this.mobileInput.jump = false; });
+                buttonPunch.on('pointerdown', () => { this.mobileInput.punch = true; });
+                buttonPunch.on('pointerup', () => { this.mobileInput.punch = false; });
+                buttonStrongAttack.on('pointerdown', () => { this.mobileInput.strongAttack = true; });
+                buttonStrongAttack.on('pointerup', () => { this.mobileInput.strongAttack = false; });
+                buttonSpecialItem.on('pointerdown', () => { this.mobileInput.specialItem = true; });
+                buttonSpecialItem.on('pointerup', () => { this.mobileInput.specialItem = false; });
+            };
             this.movePlayerMobile();
-
+            } else {
+            this.mobileInput = null;
         }
 
         // Add colliders
@@ -274,8 +321,41 @@ export class Game extends Phaser.Scene
         }
     }
 
+    updateInputState() {
+        this.inputState.left = this.keys.left.isDown || this.gamepadKeys.left.isDown || (this.mobileInput ? this.mobileInput.left : false);
+        this.inputState.right = this.keys.right.isDown || this.gamepadKeys.right.isDown || (this.mobileInput ? this.mobileInput.right : false);
+        this.inputState.up = this.keys.up.isDown || this.gamepadKeys.up.isDown || (this.mobileInput ? this.mobileInput.up : false);
+        this.inputState.down = this.keys.down.isDown || this.gamepadKeys.down.isDown || (this.mobileInput ? this.mobileInput.down : false);
+        this.inputState.jump = this.keys.jump.isDown || this.gamepadKeys.jump.isDown || (this.mobileInput ? this.mobileInput.jump : false);
+        this.inputState.punch = this.keys.punch.isDown || this.gamepadKeys.punch.isDown || (this.mobileInput ? this.mobileInput.punch : false);
+        this.inputState.strongAttack = this.keys.strongAttack.isDown || this.gamepadKeys.strongAttack.isDown || (this.mobileInput ? this.mobileInput.strongAttack : false);
+        this.inputState.specialItem = this.keys.specialItem.isDown || this.gamepadKeys.specialItem.isDown || (this.mobileInput ? this.mobileInput.specialItem : false);
+    }
+
     update(time, delta) {
-        this.player.update(this.keys, time);
+        if (this.gamepad) {
+            // Read left stick and D-pad for movement
+            const leftStickX = this.gamepad.leftStick.x;  // -1 (left) to 1 (right)
+            const leftStickY = this.gamepad.leftStick.y;  // -1 (up) to 1 (down)
+            const dpadLeft = this.gamepad.buttons[14].pressed;  // D-pad Left
+            const dpadRight = this.gamepad.buttons[15].pressed; // D-pad Right
+            const dpadUp = this.gamepad.buttons[12].pressed;    // D-pad Up
+            const dpadDown = this.gamepad.buttons[13].pressed;  // D-pad Down
+        
+            // Update movement keys (threshold of 0.5 for stick sensitivity)
+            this.gamepadKeys.left.isDown = leftStickX < -0.5 || dpadLeft;
+            this.gamepadKeys.right.isDown = leftStickX > 0.5 || dpadRight;
+            this.gamepadKeys.up.isDown = leftStickY < -0.5 || dpadUp;
+            this.gamepadKeys.down.isDown = leftStickY > 0.5 || dpadDown;
+        
+            // Update action buttons
+            this.gamepadKeys.jump.isDown = this.gamepad.buttons[0].pressed;        // A button
+            this.gamepadKeys.punch.isDown = this.gamepad.buttons[2].pressed;       // X button
+            this.gamepadKeys.strongAttack.isDown = this.gamepad.buttons[3].pressed; // Y button
+            this.gamepadKeys.specialItem.isDown = this.gamepad.buttons[1].pressed;  // B button
+        }
+        this.updateInputState();
+        this.player.update(this.inputState, time);
         
         for (const enemy of this.enemies.getChildren()) {
             const zombie = enemy.zombieInstance;

@@ -38,7 +38,7 @@ export class Player {
         });
     }
 
-    update(keys, time) {
+    update(inputState, time) {
         if (!this.sprite.active) return;
 
         // Get nearby enemies to check for blocked directions
@@ -46,14 +46,14 @@ export class Player {
         const blockedDirections = this.getBlockedDirections(nearbyEnemies);
 
         // Movement
-        if (keys.left.isDown) {
+        if (inputState.left) {
             if (!blockedDirections.left) {
                 this.sprite.body.setVelocityX(-160);
                 this.sprite.scaleX = -1; // Flip the rectangle
             } else {
                 this.sprite.body.setVelocityX(0);
             }
-        } else if (keys.right.isDown) {
+        } else if (inputState.right) {
             if (!blockedDirections.right) {
                 this.sprite.body.setVelocityX(160);
                 this.sprite.scaleX = 1;
@@ -64,26 +64,26 @@ export class Player {
             this.sprite.body.setVelocityX(0);
         }
 
-        // Jumping (both W and spacebar)
-        if ((keys.up.isDown || keys.jump.isDown) && this.sprite.body.touching.down) {
+        // Jumping (both up and jump inputs trigger jump)
+        if ((inputState.up || inputState.jump) && this.sprite.body.touching.down) {
             this.sprite.body.setVelocityY(-330);
             this.animateJump();
         }
 
-        // Regular punch (J)
-        if (keys.punch.isDown && time > this.attackCooldown) {
+        // Regular punch
+        if (inputState.punch && time > this.attackCooldown) {
             this.punch();
             this.attackCooldown = time + this.ATTACK_COOLDOWN_TIME;
         }
 
-        // Strong attack (K)
-        if (keys.strongAttack.isDown && time > this.strongAttackCooldown) {
+        // Strong attack
+        if (inputState.strongAttack && time > this.strongAttackCooldown) {
             this.strongAttack();
             this.strongAttackCooldown = time + this.STRONG_ATTACK_COOLDOWN_TIME;
         }
 
-        // Special item (L)
-        if (keys.specialItem.isDown && time > this.specialItemCooldown) {
+        // Special item
+        if (inputState.specialItem && time > this.specialItemCooldown) {
             this.useSpecialItem();
             this.specialItemCooldown = time + this.SPECIAL_ITEM_COOLDOWN_TIME;
         }
