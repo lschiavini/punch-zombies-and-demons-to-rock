@@ -40,58 +40,68 @@ export class Game extends Phaser.Scene
     }
 
     movePlayerGamepad () {
-       // Initialize virtual keys for gamepad
-    this.gamepadKeys = {
-        up: { isDown: false },
-        down: { isDown: false },
-        left: { isDown: false },
-        right: { isDown: false },
-        jump: { isDown: false },      // A button
-        punch: { isDown: false },     // X button
-        strongAttack: { isDown: false }, // Y button
-        specialItem: { isDown: false }   // B button
-    };
+          // Initialize virtual keys for gamepad
+          this.gamepadKeys = {
+              up: { isDown: false },
+              down: { isDown: false },
+              left: { isDown: false },
+              right: { isDown: false },
+              jump: { isDown: false },      // A button
+              punch: { isDown: false },     // X button
+              strongAttack: { isDown: false }, // Y button
+              specialItem: { isDown: false }   // B button
+          };
 
-    // Handle gamepad connection
-    this.input.gamepad.on('connected', (pad) => {
-        this.gamepad = pad;
-        console.log('Gamepad connected:', pad.id);
-    });
+         // Handle gamepad connection
+         this.input.gamepad.on('connected', (pad) => {
+             this.gamepad = pad;
+             console.log('Gamepad connected:', pad.id);
+         });
 
-    // Handle gamepad disconnection
-    this.input.gamepad.on('disconnected', (pad) => {
-        if (this.gamepad === pad) {
-            this.gamepad = null;
-        }
-    });
+         // Handle gamepad disconnection
+         this.input.gamepad.on('disconnected', (pad) => {
+             if (this.gamepad === pad) {
+                 this.gamepad = null;
+             }
+         });
     }
+
+    createMobileButton(x, y, label) {
+        // Create a rectangle as the button background
+        const button = this.add.rectangle(x, y, 80, 80, 0x6666ff).setInteractive().setScrollFactor(0);
+        // Add centered text on top of the rectangle
+        const text = this.add.text(x, y, label, { fontSize: '24px', fill: '#fff' })
+            .setOrigin(0.5) // Center the text
+            .setScrollFactor(0); // Keep text fixed with the button
+        return button;
+    }
+
 
     movePlayerMobile() {
         // Create mobile control buttons with adjusted positions (assuming 800x600 canvas)
-        const buttonLeft = this.add.image(50, 500, 'button').setInteractive();
-        const buttonRight = this.add.image(190, 500, 'button').setInteractive();
-        const buttonJump = this.add.image(700, 400, 'button').setInteractive();
-        const buttonPunch = this.add.image(600, 500, 'button').setInteractive();
-        const buttonStrongAttack = this.add.image(700, 500, 'button').setInteractive();
-        const buttonSpecialItem = this.add.image(750, 500, 'button').setInteractive();
+        this.buttonLeft = this.createMobileButton(50, 500, 'Left');
+        this.buttonRight = this.createMobileButton(190, 500, 'Right');
+        this.buttonJump = this.createMobileButton(700, 400, 'Jump');
+        this.buttonPunch = this.createMobileButton(600, 500, 'Punch');
+        this.buttonStrongAttack = this.createMobileButton(700, 500, 'Strong');
+        this.buttonSpecialItem = this.createMobileButton(750, 500, 'Item');
 
         // Movement controls
-        buttonLeft.on('pointerdown', () => { this.mobileInput.left = true; });
-        buttonLeft.on('pointerup', () => { this.mobileInput.left = false; });
-        buttonRight.on('pointerdown', () => { this.mobileInput.right = true; });
-        buttonRight.on('pointerup', () => { this.mobileInput.right = false; });
+        this.buttonLeft.on('pointerdown', () => { this.mobileInput.left = true; });
+        this.buttonLeft.on('pointerup', () => { this.mobileInput.left = false; });
+        this.buttonRight.on('pointerdown', () => { this.mobileInput.right = true; });
+        this.buttonRight.on('pointerup', () => { this.mobileInput.right = false; });
 
         // Action controls
-        buttonJump.on('pointerdown', () => { this.mobileInput.jump = true; });
-        buttonJump.on('pointerup', () => { this.mobileInput.jump = false; });
-        buttonPunch.on('pointerdown', () => { this.mobileInput.punch = true; });
-        buttonPunch.on('pointerup', () => { this.mobileInput.punch = false; });
-        buttonStrongAttack.on('pointerdown', () => { this.mobileInput.strongAttack = true; });
-        buttonStrongAttack.on('pointerup', () => { this.mobileInput.strongAttack = false; });
-        buttonSpecialItem.on('pointerdown', () => { this.mobileInput.specialItem = true; });
-        buttonSpecialItem.on('pointerup', () => { this.mobileInput.specialItem = false; });
+        this.buttonJump.on('pointerdown', () => { this.mobileInput.jump = true; });
+        this.buttonJump.on('pointerup', () => { this.mobileInput.jump = false; });
+        this.buttonPunch.on('pointerdown', () => { this.mobileInput.punch = true; });
+        this.buttonPunch.on('pointerup', () => { this.mobileInput.punch = false; });
+        this.buttonStrongAttack.on('pointerdown', () => { this.mobileInput.strongAttack = true; });
+        this.buttonStrongAttack.on('pointerup', () => { this.mobileInput.strongAttack = false; });
+        this.buttonSpecialItem.on('pointerdown', () => { this.mobileInput.specialItem = true; });
+        this.buttonSpecialItem.on('pointerup', () => { this.mobileInput.specialItem = false; });
 
-        // Enable multi-touch (support up to 4 touches)
         this.input.addPointer(3);
     }
 
