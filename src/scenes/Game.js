@@ -51,7 +51,44 @@ export class Game extends Phaser.Scene
         this.physics.add.collider(this.player.sprite, this.walls);
         this.physics.add.collider(this.enemies, this.walls);
         this.physics.add.collider(this.enemies, this.enemies);
-        this.physics.add.collider(this.player.sprite, this.enemies);
+        
+        // Add solid collision between player and enemies with separation
+        this.physics.add.collider(
+            this.player.sprite,
+            this.enemies,
+            null,
+            (player, enemy) => {
+                // Calculate separation vector
+                const dx = player.x - enemy.x;
+                const dy = player.y - enemy.y;
+                const direction = Math.sign(dx);
+                
+                // Immediate position correction to prevent overlap
+                const minSeparation = 32; // Width of sprites
+                const currentSeparation = Math.abs(dx);
+                
+                if (currentSeparation < minSeparation) {
+                    const correction = (minSeparation - currentSeparation) / 2;
+                    player.x += correction * direction;
+                    enemy.x -= correction * direction;
+                    
+                    // Stop horizontal movement
+                    player.body.velocity.x = 0;
+                    enemy.body.velocity.x = 0;
+                }
+                
+                // Minimal vertical separation if needed
+                if (Math.abs(dy) < 48) { // Height of sprites
+                    const verticalDirection = Math.sign(dy);
+                    const verticalCorrection = (48 - Math.abs(dy)) / 2;
+                    player.y += verticalCorrection * verticalDirection;
+                    enemy.y -= verticalCorrection * verticalDirection;
+                }
+                
+                return true;
+            },
+            this
+        );
         
         // Add overlap for damage handling
         this.physics.add.overlap(

@@ -12,6 +12,10 @@ export class Zombie {
         // Physics properties
         this.sprite.body.setCollideWorldBounds(true);
         this.sprite.body.setGravityY(300);
+        this.sprite.body.setBounce(0.1);
+        this.sprite.body.setFriction(1, 1);
+        this.sprite.body.setDrag(100, 0);
+        this.sprite.body.setMaxVelocity(200, 600);
         
         // Zombie properties
         this.speed = 50;

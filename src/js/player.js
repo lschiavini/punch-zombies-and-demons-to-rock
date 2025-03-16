@@ -9,6 +9,10 @@ export class Player {
         // Physics properties
         this.sprite.body.setCollideWorldBounds(true);
         this.sprite.body.setGravityY(300);
+        this.sprite.body.setBounce(0.1);
+        this.sprite.body.setFriction(1, 1);
+        this.sprite.body.setDrag(100, 0);
+        this.sprite.body.setMaxVelocity(300, 600);
         
         // Player properties
         this.health = 100;
@@ -37,13 +41,25 @@ export class Player {
     update(keys, time) {
         if (!this.sprite.active) return;
 
+        // Get nearby enemies to check for blocked directions
+        const nearbyEnemies = this.scene.enemies.getChildren();
+        const blockedDirections = this.getBlockedDirections(nearbyEnemies);
+
         // Movement
         if (keys.left.isDown) {
-            this.sprite.body.setVelocityX(-160);
-            this.sprite.scaleX = -1; // Flip the rectangle
+            if (!blockedDirections.left) {
+                this.sprite.body.setVelocityX(-160);
+                this.sprite.scaleX = -1; // Flip the rectangle
+            } else {
+                this.sprite.body.setVelocityX(0);
+            }
         } else if (keys.right.isDown) {
-            this.sprite.body.setVelocityX(160);
-            this.sprite.scaleX = 1;
+            if (!blockedDirections.right) {
+                this.sprite.body.setVelocityX(160);
+                this.sprite.scaleX = 1;
+            } else {
+                this.sprite.body.setVelocityX(0);
+            }
         } else {
             this.sprite.body.setVelocityX(0);
         }
@@ -79,6 +95,31 @@ export class Player {
 
         // Update health text
         this.healthText.setText(`Health: ${this.health}`);
+    }
+
+    getBlockedDirections(enemies) {
+        const blockedDirections = {
+            left: false,
+            right: false
+        };
+
+        const BLOCKING_DISTANCE = 40; // Distance at which enemies block movement
+
+        for (const enemy of enemies) {
+            const dx = enemy.x - this.sprite.x;
+            const dy = Math.abs(enemy.y - this.sprite.y);
+            
+            // Only consider enemies at roughly the same height
+            if (dy < 40) {
+                if (dx > 0 && dx < BLOCKING_DISTANCE) {
+                    blockedDirections.right = true;
+                } else if (dx < 0 && Math.abs(dx) < BLOCKING_DISTANCE) {
+                    blockedDirections.left = true;
+                }
+            }
+        }
+
+        return blockedDirections;
     }
 
     punch() {
