@@ -214,17 +214,26 @@ export class Game extends Phaser.Scene
         );
     }
 
+    getCompletionText() {
+         if (this.enemiesKilled === 0) {
+            return 'LOSER. You skipped the level without killing any enemies!';
+        } else if (this.enemiesKilled === 1) {
+            return 'Pussy! You only killed 1 enemy!';
+        } else if (this.enemiesKilled < 5) {
+            return `You killed ${this.enemiesKilled} enemies! Try harder next time!`;
+        } else if(this.enemiesKilled < 10) {
+            return `I'm sure you could have done better`;
+        } else if(this.enemiesKilled < 15) {
+            return `You killed ${this.enemiesKilled} enemies! Impressive`;
+        }
+    }
+
     // Add this new method
-    handleDoorCollision() {
-        // Only show the message once
-        if (!this.levelComplete) {
-            this.levelComplete = true;
-
-
+    handleDoorCollision() { // Only show the message once if (!this.levelComplete) { this.levelComplete = true;
             // Create completion text
             const completionText = this.add.text(400, 300,
-                `You killed ${this.enemiesKilled} ${this.enemiesKilled > 1? 'enemies' : 'enemy'}! Congrats!`, {
-                fontSize: '32px',
+                this.getCompletionText(), {
+                fontSize: '20px',
                 fill: '#fff',
                 backgroundColor: '#000',
                 padding: { x: 20, y: 10 }
@@ -236,7 +245,6 @@ export class Game extends Phaser.Scene
             this.time.delayedCall(3000, () => {
                 completionText.destroy();
             });
-        }
     }
 
     createWorld() {
@@ -364,16 +372,39 @@ export class Game extends Phaser.Scene
         // this.playerPosText.setText(`X: ${Math.round(this.player.sprite.x)}`);
     }
 
+    getGameOverText() {
+        if (this.enemiesKilled === 0) {
+            return 'LOSER. You died without killing any enemies!';
+        } else if (this.enemiesKilled === 1) {
+            return 'Horrible. You killed 1 enemy!';
+        } else if (this.enemiesKilled < 5) {
+            return `You killed ${this.enemiesKilled} enemies! Try harder next time!`;
+        } else if(this.enemiesKilled < 10) {
+            return `I'm sure you could have done better`;
+        } else if(this.enemiesKilled < 15) {
+            return `You killed ${this.enemiesKilled} enemies! Impressive`;
+        }
+    }
+
     gameOver() {
         this.isGameOver = true;
         this.player.sprite.setActive(false);
         // Show game over text
         const centerX = this.cameras.main.centerX;
         const centerY = this.cameras.main.centerY;
-        const gameOverText = this.add.text(centerX, centerY, 'Game Over\nPress R(or A) to restart', {
-            fontSize: '48px',
+        const gameOverTitle = this.add.text(centerX, centerY, 'Game Over\nPress R(or A) to restart', {
+            fontSize: '36px',
             fill: '#fff',
             align: 'center'
+        }).setOrigin(0.5);
+
+        gameOverTitle.setScrollFactor(0); // Makes the text follow the camera
+
+        const gameOverText = this.add.text(centerX, centerY+60, this.getGameOverText(),
+            {
+                fontSize: '24px',
+                fill: '#fff',
+                align: 'center'
         }).setOrigin(0.5);
 
         gameOverText.setScrollFactor(0); // Makes the text follow the camera
