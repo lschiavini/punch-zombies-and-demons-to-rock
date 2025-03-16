@@ -19,7 +19,7 @@ export class Zombie {
         
         // Zombie properties
         this.speed = 50;
-        this.health = 2;
+        this.health = 25;
         this.isStunned = false;
         this.STUN_DURATION = 500; // ms
         this.MIN_DISTANCE = 30; // Minimum distance to maintain from player
@@ -62,11 +62,14 @@ export class Zombie {
         
         // Flash red when hit
         this.sprite.fillColor = hitColor;
-        
+
+        const direction = this.sprite.scaleX;
+        console.log('Direction:', direction);
         // Knockback animation
         this.scene.tweens.add({
             targets: this.sprite,
-            y: this.sprite.y - 20,
+            y: this.sprite.y - 5,
+            x: this.sprite.x - (direction * 5),
             duration: 100,
             yoyo: true,
             ease: 'Power1'

@@ -27,7 +27,7 @@ export class Player {
         this.SPECIAL_ITEM_COOLDOWN_TIME = 5000; // ms
         
         // Create attack hitbox (invisible by default)
-        this.attackHitbox = scene.add.rectangle(0, 0, 50, 50, 0xff0000, 0);
+        this.attackHitbox = scene.add.rectangle(0, 0, 100, 50, 0xff0000, 0);
         scene.physics.add.existing(this.attackHitbox, true);
         this.attackHitbox.visible = false;
 
@@ -156,6 +156,7 @@ export class Player {
         // Show and position attack hitbox with larger area
         this.attackHitbox.width = 45; // Larger attack area
         this.attackHitbox.visible = true;
+        this.attackHitbox.setFillStyle(0xff00ff, 0.5); // Semi-transparent red
 
         // Reset after attack
         this.scene.time.delayedCall(300, () => {
@@ -163,6 +164,7 @@ export class Player {
             this.sprite.fillColor = originalColor;
             this.attackHitbox.visible = false;
             this.attackHitbox.width = 30; // Reset to normal size
+            this.attackHitbox.setFillStyle(0xff00ff, 0); // Semi-transparent red
         });
     }
 
