@@ -23,7 +23,7 @@ export class Game extends Phaser.Scene
         this.createWorld();
 
         // Create the player
-        this.player = new Player(this, 100, 300);
+        this.player = new Player(this, 100, this.levelHeight + 150);
 
         // Create enemies group
         this.enemies = this.add.group();
@@ -140,17 +140,13 @@ export class Game extends Phaser.Scene
     }
 
     createEnemies() {
-        // Create 3 enemies at random positions within the walls
+        // Create 3 enemies starting from x=150
         for (let i = 0; i < 3; i++) {
-            // Calculate spawn area based on wall positions
-            const spawnMargin = 20; // Keep enemies away from walls
-            const minX = 400 - this.levelWidth/2 + spawnMargin;
-            const maxX = 400 + this.levelWidth/2 - spawnMargin;
-            const minY = 200 + spawnMargin; // Top wall y position
-            const maxY = 400 - spawnMargin; // Bottom wall y position
-
-            const x = Phaser.Math.Between(minX, maxX);
-            const y = Phaser.Math.Between(minY, maxY);
+            const x = 450 + (i * 100); // Space enemies 100px apart starting at x=150
+            const maxY = 400 - 20; // Bottom wall y position minus margin
+            const sizeOfEnemy = -32;
+            const y = maxY + sizeOfEnemy; // Place enemies on the ground
+            
             const zombie = new Zombie(this, x, y);
             this.enemies.add(zombie.sprite);
         }
@@ -173,14 +169,12 @@ export class Game extends Phaser.Scene
     }
 
     update(time, delta) {
-        console.log('Update called');
         this.player.update(this.keys, time);
         
-        // Update all enemies
         for (const enemy of this.enemies.getChildren()) {
             const zombie = enemy.zombieInstance;
             if (zombie) {
-                zombie.update(this.player.sprite);
+                zombie.update(this.player);
             }
         }
     }
