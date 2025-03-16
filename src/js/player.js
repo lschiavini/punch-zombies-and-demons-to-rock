@@ -20,14 +20,14 @@ export class Player {
         this.attackCooldown = 0;
         this.ATTACK_COOLDOWN_TIME = 300; // ms
         this.isInvulnerable = false;
-        this.INVULNERABILITY_TIME = 1000; // ms
+        this.INVULNERABILITY_TIME = 500; // ms
         this.strongAttackCooldown = 0;
         this.STRONG_ATTACK_COOLDOWN_TIME = 1000; // ms
         this.specialItemCooldown = 0;
         this.SPECIAL_ITEM_COOLDOWN_TIME = 5000; // ms
         
         // Create attack hitbox (invisible by default)
-        this.attackHitbox = scene.add.rectangle(0, 0, 30, 30, 0xff0000, 0);
+        this.attackHitbox = scene.add.rectangle(0, 0, 50, 50, 0xff0000, 0);
         scene.physics.add.existing(this.attackHitbox, true);
         this.attackHitbox.visible = false;
 
@@ -90,8 +90,9 @@ export class Player {
 
         // Update attack hitbox position
         const direction = this.sprite.scaleX;
-        this.attackHitbox.x = this.sprite.x + (40 * direction);
+        this.attackHitbox.x = this.sprite.x + (20 * direction);
         this.attackHitbox.y = this.sprite.y;
+        this.attackHitbox.body.reset(this.attackHitbox.x, this.attackHitbox.y);
 
         // Update health text
         this.healthText.setText(`Health: ${this.health}`);
@@ -129,12 +130,15 @@ export class Player {
         const originalColor = 0xff0000;
         const attackColor = 0xff6666;
         this.sprite.fillColor = attackColor;
+
         
         // Show and position attack hitbox
         this.attackHitbox.visible = true;
+        this.attackHitbox.setFillStyle(0xff0000, 0.5); // Semi-transparent red
 
         // Reset after attack
         this.scene.time.delayedCall(150, () => {
+            this.attackHitbox.setFillStyle(0xff0000, 0); // Back to invisible
             this.isAttacking = false;
             this.sprite.fillColor = originalColor;
             this.attackHitbox.visible = false;

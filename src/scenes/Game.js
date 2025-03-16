@@ -157,13 +157,17 @@ export class Game extends Phaser.Scene
     }
 
     handlePlayerAttack(hitbox, enemy) {
+        console.log('Overlap detected with enemy');
         if (this.player.isAttacking && enemy.zombieInstance) {
+            console.log('Applying damage to zombie');
             enemy.zombieInstance.damage();
         }
     }
 
     handlePlayerEnemyCollision(playerSprite, enemy) {
+        console.log('Collision detected with player');
         if (enemy.zombieInstance && !this.player.isInvulnerable) {
+            console.log('Applying damage to player');
             this.player.damage(10);
         }
     }
