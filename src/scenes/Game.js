@@ -132,25 +132,18 @@ export class Game extends Phaser.Scene
 
         // Enable multi-touch
         this.input.addPointer(3); // Support up to 4 simultaneous touches
-        movementButtons.on('pointerdown', () => {
+        directionButtons.on('pointerdown', () => {
             this.keys.left.isDown = true;
         });
-        movementButtons.on('pointerup', () => {
+        directionButtons.on('pointerup', () => {
             this.keys.left.isDown = false;
         });
 
-        movementButtons.on('pointerdown', () => {
+        directionButtons.on('pointerdown', () => {
             this.keys.right.isDown = true;
         });
-        movementButtons.on('pointerup', () => {
+        directionButtons.on('pointerup', () => {
             this.keys.right.isDown = false;
-        });
-
-        movementButtons.on('pointerdown', () => {
-            this.keys.jump.isDown = true;
-        });
-        movementButtons.on('pointerup', () => {
-            this.keys.jump.isDown = false;
         });
 
     }
