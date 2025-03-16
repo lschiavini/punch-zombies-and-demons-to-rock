@@ -10,6 +10,7 @@ export class Game extends Phaser.Scene
     }
 
     init() {
+        this.isGameOver = false;
         this.currentFloor = 1;
         this.maxFloors = 10;
         this.levelWidth = 5000; // Changed from 780 to 2000 for a wider level
@@ -335,6 +336,11 @@ export class Game extends Phaser.Scene
             this.gamepadKeys.punch.isDown = this.gamepad.buttons[2].pressed;       // X button
             this.gamepadKeys.strongAttack.isDown = this.gamepad.buttons[3].pressed; // Y button
             this.gamepadKeys.specialItem.isDown = this.gamepad.buttons[1].pressed;  // B button
+
+            // Restart game if game over and A button is pressed
+            if (this.isGameOver && this.gamepad.buttons[0].pressed) {
+               this.scene.restart();
+            }
         }
         this.updateInputState();
         this.player.update(this.inputState, time);
@@ -359,11 +365,12 @@ export class Game extends Phaser.Scene
     }
 
     gameOver() {
+        this.isGameOver = true;
         this.player.sprite.setActive(false);
         // Show game over text
         const centerX = this.cameras.main.centerX;
         const centerY = this.cameras.main.centerY;
-        const gameOverText = this.add.text(centerX, centerY, 'Game Over\nPress R to restart', {
+        const gameOverText = this.add.text(centerX, centerY, 'Game Over\nPress R(or A) to restart', {
             fontSize: '48px',
             fill: '#fff',
             align: 'center'
@@ -371,9 +378,34 @@ export class Game extends Phaser.Scene
 
         gameOverText.setScrollFactor(0); // Makes the text follow the camera
 
-        // Add key listener for restart
+         // Add key listener for restart
         this.input.keyboard.once('keydown-R', () => {
             this.scene.restart();
+            this.isGameOver = false;
         });
+
+        // Add mobile restart button if on touch device
+        if (this.sys.game.device.input.touch) {
+            const restartButton = this.add.rectangle(
+                centerX,
+                centerY + 100,
+                200,
+                80,
+                0xff0000
+            ).setInteractive().setScrollFactor(0);
+
+            const restartText = this.add.text(
+                centerX,
+                centerY + 100,
+                'Restart',
+                { fontSize: '32px', fill: '#fff' }
+            ).setOrigin(0.5).setScrollFactor(0);
+
+            restartButton.on('pointerdown', () => {
+                this.scene.restart();
+            this.isGameOver = false;
+            });
+
+        }
     }
 }
