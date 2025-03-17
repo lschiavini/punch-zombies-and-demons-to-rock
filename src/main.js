@@ -12,7 +12,7 @@ const config = {
         default: 'arcade',
         arcade: {
             gravity: { y: 300 },
-            debug: true // Useful during development
+            debug: process.env.NODE_ENV === 'development' // Only true during development
         }
     },
     scale: {
