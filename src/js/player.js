@@ -130,11 +130,24 @@ export class Player {
         // Strong attack
         if (inputState.strongAttack && time > this.strongAttackCooldown && !this.isPriorityAnimPlaying) {
             this.strongAttack();
-            this.sprite.anims.play('attack3', true);
+            
+            // Play attack3 animation 5 times in sequence
+            let playCount = 0;
+            const playNextAnimation = () => {
+                if (playCount < 3) {
+                    this.sprite.anims.play('attack3', true);
+                    this.sprite.once('animationcomplete', () => {
+                        playCount++;
+                        playNextAnimation();
+                    });
+                }
+            };
+            playNextAnimation();
+            
             this.strongAttackCooldown = time + this.STRONG_ATTACK_COOLDOWN_TIME;
             
             this.isPriorityAnimPlaying = true;
-            // Clear the flag after strong attack animation completes
+            // Clear the flag after all animations complete
             this.scene.time.delayedCall(this.STRONG_ATTACK_COOLDOWN_TIME, () => {
                 this.isPriorityAnimPlaying = false;
             });
@@ -162,26 +175,21 @@ export class Player {
                     this.sprite.body.setVelocityX(-160);
                     this.sprite.scaleX = -1; // Flip the sprite
                     this.sprite.anims.play('run', true);
-                    console.log('run');
                 } else {
                     this.sprite.body.setVelocityX(0);
                     this.sprite.anims.play('still', true);
-                    console.log('still');
                 }
             } else if (inputState.right) {
                 if (!blockedDirections.right) {
                     this.sprite.body.setVelocityX(160);
                     this.sprite.scaleX = 1;
                     this.sprite.anims.play('run', true);
-                    console.log('run');
                 } else {
                     this.sprite.body.setVelocityX(0);
                     this.sprite.anims.play('still', true);
-                    console.log('still');
                 }
             } else {
                 this.sprite.anims.play('still', true);
-                console.log('still');
                 this.sprite.body.setVelocityX(0);
             }
         } else {
@@ -227,32 +235,19 @@ export class Player {
     punch() {
         this.isAttacking = true;
         
-        // Show and position attack hitbox
-        this.attackHitbox.visible = true;
-        this.attackHitbox.setFillStyle(0xff0000, 0.5); // Semi-transparent red
-
         // Reset after attack
         this.scene.time.delayedCall(this.ATTACK_COOLDOWN_TIME, () => {
-            this.attackHitbox.setFillStyle(0xff0000, 0); // Back to invisible
             this.isAttacking = false;
-            this.attackHitbox.visible = false;
         });
-
 
     }
 
     strongAttack() {
         this.isAttacking = true;
         
-        // Show and position attack hitbox with larger area
-        this.attackHitbox.visible = true;
-        this.attackHitbox.setFillStyle(0xff00ff, 0.5); // Semi-transparent magenta
-
         // Reset after attack
         this.scene.time.delayedCall(this.STRONG_ATTACK_COOLDOWN_TIME, () => {
             this.isAttacking = false;
-            this.attackHitbox.visible = false;
-            this.attackHitbox.setFillStyle(0xff00ff, 0); // Back to invisible
         });
     }
 
@@ -277,6 +272,33 @@ export class Player {
         
         this.health -= amount;
         this.isInvulnerable = true;
+
+        // Create damage number text
+        const damageText = this.scene.add.text(
+            this.sprite.x, 
+            this.sprite.y - 50, // Position above player's head
+            `-${amount}`, 
+            { 
+                fontFamily: 'Arial', 
+                fontSize: 16, 
+                color: '#ff0000',
+                stroke: '#000000',
+                strokeThickness: 3
+            }
+        );
+        damageText.setOrigin(0.5); // Center the text
+        
+        // Animate the damage number
+        this.scene.tweens.add({
+            targets: damageText,
+            y: damageText.y - 30, // Float upward
+            alpha: 0, // Fade out
+            duration: 1000,
+            ease: 'Power1',
+            onComplete: () => {
+                damageText.destroy(); // Remove when animation completes
+            }
+        });
 
         // Visual feedback for damage
         this.animateDamage();

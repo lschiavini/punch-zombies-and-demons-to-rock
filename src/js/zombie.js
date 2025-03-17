@@ -108,8 +108,8 @@ export class Zombie {
         });
     }
 
-    damage() {
-        this.health--;
+    damage(amount = 1) {
+        this.health -= amount;
         this.isStunned = true;
         
         // Visual feedback
@@ -118,6 +118,33 @@ export class Zombie {
         
         // Flash red when hit
         this.sprite.fillColor = hitColor;
+
+        // Create damage number text
+        const damageText = this.scene.add.text(
+            this.sprite.x, 
+            this.sprite.y - 40, // Position above zombie's head
+            `-${amount}`, 
+            { 
+                fontFamily: 'Arial', 
+                fontSize: 16, 
+                color: '#ff0000',
+                stroke: '#000000',
+                strokeThickness: 3
+            }
+        );
+        damageText.setOrigin(0.5); // Center the text
+        
+        // Animate the damage number
+        this.scene.tweens.add({
+            targets: damageText,
+            y: damageText.y - 30, // Float upward
+            alpha: 0, // Fade out
+            duration: 1000,
+            ease: 'Power1',
+            onComplete: () => {
+                damageText.destroy(); // Remove when animation completes
+            }
+        });
 
         const direction = this.sprite.scaleX;
         // Knockback animation
