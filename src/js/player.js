@@ -1,6 +1,7 @@
 export class Player {
-    constructor(scene, x, y) {
+    constructor(scene, x, y, characterType = 'fighter') {
         this.scene = scene;
+        this.characterType = characterType;
         
         // Create the player sprite
         this.sprite = scene.physics.add.sprite(x, y, 'idle');
@@ -57,6 +58,26 @@ export class Player {
         this.comboCount = 0;
         this.comboResetTime = 0;
         this.COMBO_WINDOW = 1000; // Time window in ms to continue combo
+
+        // You might want to adjust properties based on character type
+        switch(characterType) {
+            case 'shinobi':
+                this.speed = 250; // Maybe shinobi is faster
+                this.jumpStrength = 450;
+                this.attackPower = 2;
+                break;
+            case 'samurai':
+                this.speed = 180; // Samurai is slower but stronger
+                this.jumpStrength = 400;
+                this.attackPower = 4;
+                break;
+            case 'fighter':
+            default:
+                this.speed = 200;
+                this.jumpStrength = 420;
+                this.attackPower = 3;
+                break;
+        }
     }
 
     getHealth() {

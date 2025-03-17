@@ -29,14 +29,19 @@ export class Game extends Phaser.Scene
     }
 
     preload() {
-        this.load.spritesheet('idle', 'assets/images/sprites/fighter/Idle.png', { frameWidth: 128, frameHeight: 128 });
-        this.load.spritesheet('run', 'assets/images/sprites/fighter/Run.png', { frameWidth: 128, frameHeight: 128 });
-        this.load.spritesheet('jump', 'assets/images/sprites/fighter/Jump.png', { frameWidth: 128, frameHeight: 128 });
-        this.load.spritesheet('attack1', 'assets/images/sprites/fighter/Attack_1.png', { frameWidth: 128, frameHeight: 128 });
-        this.load.spritesheet('attack2', 'assets/images/sprites/fighter/Attack_2.png', { frameWidth: 128, frameHeight: 128 });
-        this.load.spritesheet('attack3', 'assets/images/sprites/fighter/Attack_3.png', { frameWidth: 128, frameHeight: 128 });
-        this.load.spritesheet('shield', 'assets/images/sprites/fighter/Shield.png', { frameWidth: 128, frameHeight: 128 });
+        // Get the character type from scene data or use default
+        this.characterType = this.scene.settings.data?.characterType || 'fighter';
+        
+        // Load spritesheets based on selected character
+        this.load.spritesheet('idle', `assets/images/sprites/boys/${this.characterType}/Idle.png`, { frameWidth: 128, frameHeight: 128 });
+        this.load.spritesheet('run', `assets/images/sprites/boys/${this.characterType}/Run.png`, { frameWidth: 128, frameHeight: 128 });
+        this.load.spritesheet('jump', `assets/images/sprites/boys/${this.characterType}/Jump.png`, { frameWidth: 128, frameHeight: 128 });
+        this.load.spritesheet('attack1', `assets/images/sprites/boys/${this.characterType}/Attack_1.png`, { frameWidth: 128, frameHeight: 128 });
+        this.load.spritesheet('attack2', `assets/images/sprites/boys/${this.characterType}/Attack_2.png`, { frameWidth: 128, frameHeight: 128 });
+        this.load.spritesheet('attack3', `assets/images/sprites/boys/${this.characterType}/Attack_3.png`, { frameWidth: 128, frameHeight: 128 });
+        this.load.spritesheet('shield', `assets/images/sprites/boys/${this.characterType}/Shield.png`, { frameWidth: 128, frameHeight: 128 });
     }
+
 
 
     movePlayerDesktop () {
@@ -118,10 +123,44 @@ export class Game extends Phaser.Scene
     }
 
     createAnimations() {
+        // Define frame counts for each character type
+        const frameConfig = {
+            fighter: {
+                idle: 5,
+                run: 7,
+                jump: 9,
+                attack1: 3,
+                attack2: 2,
+                attack3: 3,
+                special: 1 // Shield animation
+            },
+            samurai: {
+                idle: 5,
+                run: 7,
+                jump: 11, // 12 frames (0-11)
+                attack1: 5, // 6 frames (0-5)
+                attack2: 3, // 4 frames (0-3)
+                attack3: 2, // 3 frames (0-2)
+                special: 1  // Shield animation has 2 frames (0-1)
+            },
+            shinobi: {
+                idle: 5,
+                run: 7,
+                jump: 11, // 12 frames (0-11)
+                attack1: 4, // 5 frames (0-4)
+                attack2: 2, // 3 frames (0-2)
+                attack3: 3, // 4 frames (0-3)
+                special: 3  // Shield animation has 4 frames (0-3)
+            }
+        };
+        
+        // Get the frame counts for the selected character
+        const frames = frameConfig[this.characterType] || frameConfig.fighter;
+        
         // Still animation using Idle spritesheet
         this.anims.create({
             key: 'still',
-            frames: this.anims.generateFrameNumbers('idle', { start: 0, end: 5 }),
+            frames: this.anims.generateFrameNumbers('idle', { start: 0, end: frames.idle }),
             frameRate: 10,
             repeat: -1
         });
@@ -129,7 +168,7 @@ export class Game extends Phaser.Scene
         // Run animation using Run spritesheet
         this.anims.create({
             key: 'run',
-            frames: this.anims.generateFrameNumbers('run', { start: 0, end: 7 }),
+            frames: this.anims.generateFrameNumbers('run', { start: 0, end: frames.run }),
             frameRate: 15,
             repeat: -1
         });
@@ -137,7 +176,7 @@ export class Game extends Phaser.Scene
         // Jump animation using Jump spritesheet
         this.anims.create({
             key: 'jump',
-            frames: this.anims.generateFrameNumbers('jump', { start: 0, end: 9 }),
+            frames: this.anims.generateFrameNumbers('jump', { start: 0, end: frames.jump }),
             frameRate: 10,
             repeat: 0
         });
@@ -145,7 +184,7 @@ export class Game extends Phaser.Scene
         // Attack animation using Attack_1 spritesheet
         this.anims.create({
             key: 'attack1',
-            frames: this.anims.generateFrameNumbers('attack1', { start: 0, end: 3 }),
+            frames: this.anims.generateFrameNumbers('attack1', { start: 0, end: frames.attack1 }),
             frameRate: 12,
             repeat: 0
         });
@@ -153,7 +192,7 @@ export class Game extends Phaser.Scene
         // Attack animation using Attack_2 spritesheet
         this.anims.create({
             key: 'attack2',
-            frames: this.anims.generateFrameNumbers('attack2', { start: 0, end: 2 }),
+            frames: this.anims.generateFrameNumbers('attack2', { start: 0, end: frames.attack2 }),
             frameRate: 12,
             repeat: 0
         });
@@ -161,15 +200,15 @@ export class Game extends Phaser.Scene
         // Attack animation using Attack_3 spritesheet
         this.anims.create({
             key: 'attack3',
-            frames: this.anims.generateFrameNumbers('attack3', { start: 0, end: 3 }),
+            frames: this.anims.generateFrameNumbers('attack3', { start: 0, end: frames.attack3 }),
             frameRate: 12,
             repeat: 0
         });
 
-        // Disappear animation using Shield spritesheet
+        // Special animation using Shield spritesheet
         this.anims.create({
             key: 'special',
-            frames: this.anims.generateFrameNumbers('shield', { start: 0, end: 1 }),
+            frames: this.anims.generateFrameNumbers('shield', { start: 0, end: frames.special }),
             frameRate: 10,
             repeat: 0
         });
@@ -180,8 +219,8 @@ export class Game extends Phaser.Scene
         // Create the bordered level
         this.createWorld();
 
-        // Create the player
-        this.player = new Player(this, 100, this.levelHeight + 50);
+        // Create the player with selected character type
+        this.player = new Player(this, 100, this.levelHeight + 50, this.characterType);
 
         // // New player position text, placed below floor text
         // this.playerPosText = this.add.text(16, 60, `X: ${Math.round(this.player.sprite.x)}`, {

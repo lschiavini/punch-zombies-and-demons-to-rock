@@ -1,5 +1,5 @@
 import { Game } from './scenes/Game';
-
+import { CharacterSelect } from './scenes/CharacterSelect';
 //  Find out more information about the Game Config at:
 //  https://newdocs.phaser.io/docs/3.70.0/Phaser.Types.Core.GameConfig
 const config = {
@@ -22,7 +22,7 @@ const config = {
     input: {
         gamepad: true
     },
-    scene: Game
+    scene: [CharacterSelect, Game]
 };
 
 export default new Phaser.Game(config);
