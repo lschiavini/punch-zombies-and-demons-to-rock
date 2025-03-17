@@ -29,11 +29,15 @@ export class Game extends Phaser.Scene
     }
 
     preload() {
-        this.load.spritesheet('player', 'assets/images/sprites/hooded_character.png', {
-            frameWidth: 32,
-            frameHeight: 32,
-        });
+        this.load.spritesheet('idle', 'assets/images/sprites/fighter/Idle.png', { frameWidth: 128, frameHeight: 128 });
+        this.load.spritesheet('run', 'assets/images/sprites/fighter/Run.png', { frameWidth: 128, frameHeight: 128 });
+        this.load.spritesheet('jump', 'assets/images/sprites/fighter/Jump.png', { frameWidth: 128, frameHeight: 128 });
+        this.load.spritesheet('attack1', 'assets/images/sprites/fighter/Attack_1.png', { frameWidth: 128, frameHeight: 128 });
+        this.load.spritesheet('attack2', 'assets/images/sprites/fighter/Attack_2.png', { frameWidth: 128, frameHeight: 128 });
+        this.load.spritesheet('attack3', 'assets/images/sprites/fighter/Attack_3.png', { frameWidth: 128, frameHeight: 128 });
+        this.load.spritesheet('shield', 'assets/images/sprites/fighter/Shield.png', { frameWidth: 128, frameHeight: 128 });
     }
+
 
     movePlayerDesktop () {
         this.keys = {
@@ -114,75 +118,59 @@ export class Game extends Phaser.Scene
     }
 
     createAnimations() {
-        // Row 1: Idle/Still
+        // Still animation using Idle spritesheet
         this.anims.create({
             key: 'still',
-            frames: this.anims.generateFrameNumbers('player', { frames: [0, 1] }),
+            frames: this.anims.generateFrameNumbers('idle', { start: 0, end: 5 }),
             frameRate: 10,
             repeat: -1
         });
 
-        // Row 2: Alternate Idle/Still
-        this.anims.create({
-            key: 'still2',
-            frames: this.anims.generateFrameNumbers('player', { frames: [8, 9] }),
-            frameRate: 10,
-            repeat: -1
-        });
-
-        // Row 3: Walk
-        this.anims.create({
-            key: 'walk',
-            frames: this.anims.generateFrameNumbers('player', { frames: [16, 17, 18, 19] }),
-            frameRate: 10,
-            repeat: -1
-        });
-
-        // Row 4: Fast Walk/Run
+        // Run animation using Run spritesheet
         this.anims.create({
             key: 'run',
-            frames: this.anims.generateFrameNumbers('player', { frames: [24, 25, 26, 27, 28, 29, 30, 31] }),
+            frames: this.anims.generateFrameNumbers('run', { start: 0, end: 7 }),
             frameRate: 15,
             repeat: -1
         });
 
-        // Row 5: Dodge
-        this.anims.create({
-            key: 'dodge',
-            frames: this.anims.generateFrameNumbers('player', { frames: [32, 33, 34, 35, 36, 37] }),
-            frameRate: 12,
-            repeat: 0
-        });
-
-        // Row 6: Jump
+        // Jump animation using Jump spritesheet
         this.anims.create({
             key: 'jump',
-            frames: this.anims.generateFrameNumbers('player', { frames: [40, 41, 42, 43, 44, 45, 46, 47] }),
+            frames: this.anims.generateFrameNumbers('jump', { start: 0, end: 9 }),
             frameRate: 10,
             repeat: 0
         });
 
-        // Row 7: Disappear
+        // Attack animation using Attack_1 spritesheet
         this.anims.create({
-            key: 'disappear',
-            frames: this.anims.generateFrameNumbers('player', { frames: [48, 49, 50] }),
-            frameRate: 10,
-            repeat: 0
-        });
-
-        // Row 8: Die
-        this.anims.create({
-            key: 'die',
-            frames: this.anims.generateFrameNumbers('player', { frames: [56, 57, 58, 59, 60, 61, 62, 63] }),
-            frameRate: 8,
-            repeat: 0
-        });
-
-        // Row 9: Attack
-        this.anims.create({
-            key: 'attack',
-            frames: this.anims.generateFrameNumbers('player', { frames: [64, 65, 66, 67, 68, 69, 70, 71] }),
+            key: 'attack1',
+            frames: this.anims.generateFrameNumbers('attack1', { start: 0, end: 3 }),
             frameRate: 12,
+            repeat: 0
+        });
+
+        // Attack animation using Attack_2 spritesheet
+        this.anims.create({
+            key: 'attack2',
+            frames: this.anims.generateFrameNumbers('attack2', { start: 0, end: 2 }),
+            frameRate: 12,
+            repeat: 0
+        });
+
+        // Attack animation using Attack_3 spritesheet
+        this.anims.create({
+            key: 'attack3',
+            frames: this.anims.generateFrameNumbers('attack3', { start: 0, end: 3 }),
+            frameRate: 12,
+            repeat: 0
+        });
+
+        // Disappear animation using Shield spritesheet
+        this.anims.create({
+            key: 'special',
+            frames: this.anims.generateFrameNumbers('shield', { start: 0, end: 1 }),
+            frameRate: 10,
             repeat: 0
         });
     }
@@ -193,7 +181,7 @@ export class Game extends Phaser.Scene
         this.createWorld();
 
         // Create the player
-        this.player = new Player(this, 100, this.levelHeight + 150);
+        this.player = new Player(this, 100, this.levelHeight + 50);
 
         // // New player position text, placed below floor text
         // this.playerPosText = this.add.text(16, 60, `X: ${Math.round(this.player.sprite.x)}`, {
