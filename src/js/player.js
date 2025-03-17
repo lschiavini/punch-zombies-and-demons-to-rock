@@ -3,10 +3,14 @@ export class Player {
         this.scene = scene;
         
         // Create the player sprite as a red rectangle
-        this.sprite = scene.add.rectangle(x, y, 32, 48, 0xff0000);
+        // this.sprite = scene.add.rectangle(x, y, 32, 48, 0xff0000);
+        this.sprite = scene.physics.add.sprite(x, y, 'player');
+        this.sprite.setOrigin(0.5, 0.5);
+
         scene.physics.add.existing(this.sprite);
-        
-        // Physics properties
+
+        this.sprite.anims.play('still');        // Physics properties
+
         this.sprite.body.setCollideWorldBounds(true);
         this.sprite.body.setGravityY(300);
         this.sprite.body.setBounce(0.1);
@@ -25,6 +29,10 @@ export class Player {
         this.STRONG_ATTACK_COOLDOWN_TIME = 1000; // ms
         this.specialItemCooldown = 0;
         this.SPECIAL_ITEM_COOLDOWN_TIME = 5000; // ms
+        this.JUMP_COOLDOWN_TIME = 500; // ms
+        
+        // Animation tracking
+        this.isPriorityAnimPlaying = false;
         
         // Create attack hitbox (invisible by default)
         this.attackHitbox = scene.add.rectangle(0, 0, 100, 50, 0xff0000, 0);
@@ -46,53 +54,16 @@ export class Player {
 
     update(inputState, time) {
         if (!this.sprite.active) return;
+        
+        // Handle priority actions
+        this.handlePriorityActions(inputState, time);
 
         // Get nearby enemies to check for blocked directions
         const nearbyEnemies = this.scene.enemies.getChildren();
         const blockedDirections = this.getBlockedDirections(nearbyEnemies);
 
-        // Movement
-        if (inputState.left) {
-            if (!blockedDirections.left) {
-                this.sprite.body.setVelocityX(-160);
-                this.sprite.scaleX = -1; // Flip the rectangle
-            } else {
-                this.sprite.body.setVelocityX(0);
-            }
-        } else if (inputState.right) {
-            if (!blockedDirections.right) {
-                this.sprite.body.setVelocityX(160);
-                this.sprite.scaleX = 1;
-            } else {
-                this.sprite.body.setVelocityX(0);
-            }
-        } else {
-            this.sprite.body.setVelocityX(0);
-        }
-
-        // Jumping (both up and jump inputs trigger jump)
-        if ((inputState.up || inputState.jump) && this.sprite.body.touching.down) {
-            this.sprite.body.setVelocityY(-330);
-            this.animateJump();
-        }
-
-        // Regular punch
-        if (inputState.punch && time > this.attackCooldown) {
-            this.punch();
-            this.attackCooldown = time + this.ATTACK_COOLDOWN_TIME;
-        }
-
-        // Strong attack
-        if (inputState.strongAttack && time > this.strongAttackCooldown) {
-            this.strongAttack();
-            this.strongAttackCooldown = time + this.STRONG_ATTACK_COOLDOWN_TIME;
-        }
-
-        // Special item
-        if (inputState.specialItem && time > this.specialItemCooldown) {
-            this.useSpecialItem();
-            this.specialItemCooldown = time + this.SPECIAL_ITEM_COOLDOWN_TIME;
-        }
+        // Handle movement
+        this.handleMovement(inputState, blockedDirections);
 
         // Update attack hitbox position
         const direction = this.sprite.scaleX;
@@ -102,6 +73,108 @@ export class Player {
 
         // Update health text
         this.healthText.setText(`Health: ${this.health}`);
+    }
+
+    handlePriorityActions(inputState, time) {
+        // Jumping (both up and jump inputs trigger jump)
+        if ((inputState.up || inputState.jump) && this.sprite.body.touching.down && !this.isPriorityAnimPlaying) {
+            console.log('jump');
+            this.sprite.anims.play('jump', true);
+            this.sprite.body.setVelocityY(-330);
+            this.animateJump();
+            this.isPriorityAnimPlaying = true;
+            // Clear the flag after jump animation would reasonably be complete
+            this.scene.time.delayedCall(this.JUMP_COOLDOWN_TIME, () => {
+                this.isPriorityAnimPlaying = false;
+            });
+        }
+
+        // Regular punch
+        if (inputState.punch && time > this.attackCooldown && !this.isPriorityAnimPlaying) {
+            console.log('punch');
+            this.sprite.anims.play('attack', true);
+            this.punch();
+            this.attackCooldown = time + this.ATTACK_COOLDOWN_TIME;
+            
+            this.isPriorityAnimPlaying = true;
+            // Clear the flag after punch animation completes
+            this.scene.time.delayedCall(this.ATTACK_COOLDOWN_TIME, () => {
+                this.isPriorityAnimPlaying = false;
+            });
+        }
+
+        // Strong attack
+        if (inputState.strongAttack && time > this.strongAttackCooldown && !this.isPriorityAnimPlaying) {
+            console.log('strong attack');
+            this.sprite.anims.play('attack', true);
+            this.strongAttack();
+            this.strongAttackCooldown = time + this.STRONG_ATTACK_COOLDOWN_TIME;
+            
+            this.isPriorityAnimPlaying = true;
+            // Clear the flag after strong attack animation completes
+            this.scene.time.delayedCall(this.STRONG_ATTACK_COOLDOWN_TIME, () => {
+                this.isPriorityAnimPlaying = false;
+            });
+        }
+
+        // Special item
+        if (inputState.specialItem && time > this.specialItemCooldown && !this.isPriorityAnimPlaying) {
+            console.log('special item');
+            this.sprite.anims.play('disappear', true);
+            this.useSpecialItem();
+            this.specialItemCooldown = time + this.SPECIAL_ITEM_COOLDOWN_TIME;
+            
+            this.isPriorityAnimPlaying = true;
+            // Clear the flag after special item animation completes
+            this.scene.time.delayedCall(this.SPECIAL_ITEM_COOLDOWN_TIME, () => {
+                this.isPriorityAnimPlaying = false;
+            });
+        }
+    }
+
+    handleMovement(inputState, blockedDirections) {
+        // Only play movement animations if no priority animation is active
+        if (!this.isPriorityAnimPlaying) {
+            if (inputState.left) {
+                if (!blockedDirections.left) {
+                    this.sprite.body.setVelocityX(-160);
+                    this.sprite.scaleX = -1; // Flip the sprite
+                    this.sprite.anims.play('run', true);
+                    console.log('run');
+                } else {
+                    this.sprite.body.setVelocityX(0);
+                    this.sprite.anims.play('still', true);
+                    console.log('still');
+                }
+            } else if (inputState.right) {
+                if (!blockedDirections.right) {
+                    this.sprite.body.setVelocityX(160);
+                    this.sprite.scaleX = 1;
+                    this.sprite.anims.play('run', true);
+                    console.log('run');
+                } else {
+                    this.sprite.body.setVelocityX(0);
+                    this.sprite.anims.play('still', true);
+                    console.log('still');
+                }
+            } else {
+                this.sprite.anims.play('still', true);
+                console.log('still');
+                this.sprite.body.setVelocityX(0);
+            }
+        } else {
+            // Apply movement velocity even during priority animations
+            if (inputState.left && !blockedDirections.left) {
+                this.sprite.body.setVelocityX(-160);
+                this.sprite.scaleX = -1; // Flip the sprite
+            } else if (inputState.right && !blockedDirections.right) {
+                this.sprite.body.setVelocityX(160);
+                this.sprite.scaleX = 1;
+            } else {
+                // Slow down if no direction pressed
+                this.sprite.body.setVelocityX(0);
+            }
+        }
     }
 
     getBlockedDirections(enemies) {

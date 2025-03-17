@@ -28,6 +28,13 @@ export class Game extends Phaser.Scene
         };
     }
 
+    preload() {
+        this.load.spritesheet('player', 'assets/images/sprites/hooded_character.png', {
+            frameWidth: 32,
+            frameHeight: 32,
+        });
+    }
+
     movePlayerDesktop () {
         this.keys = {
             up: this.input.keyboard.addKey('W'),
@@ -106,7 +113,82 @@ export class Game extends Phaser.Scene
         this.input.addPointer(3);
     }
 
+    createAnimations() {
+        // Row 1: Idle/Still
+        this.anims.create({
+            key: 'still',
+            frames: this.anims.generateFrameNumbers('player', { frames: [0, 1] }),
+            frameRate: 10,
+            repeat: -1
+        });
+
+        // Row 2: Alternate Idle/Still
+        this.anims.create({
+            key: 'still2',
+            frames: this.anims.generateFrameNumbers('player', { frames: [8, 9] }),
+            frameRate: 10,
+            repeat: -1
+        });
+
+        // Row 3: Walk
+        this.anims.create({
+            key: 'walk',
+            frames: this.anims.generateFrameNumbers('player', { frames: [16, 17, 18, 19] }),
+            frameRate: 10,
+            repeat: -1
+        });
+
+        // Row 4: Fast Walk/Run
+        this.anims.create({
+            key: 'run',
+            frames: this.anims.generateFrameNumbers('player', { frames: [24, 25, 26, 27, 28, 29, 30, 31] }),
+            frameRate: 15,
+            repeat: -1
+        });
+
+        // Row 5: Dodge
+        this.anims.create({
+            key: 'dodge',
+            frames: this.anims.generateFrameNumbers('player', { frames: [32, 33, 34, 35, 36, 37] }),
+            frameRate: 12,
+            repeat: 0
+        });
+
+        // Row 6: Jump
+        this.anims.create({
+            key: 'jump',
+            frames: this.anims.generateFrameNumbers('player', { frames: [40, 41, 42, 43, 44, 45, 46, 47] }),
+            frameRate: 10,
+            repeat: 0
+        });
+
+        // Row 7: Disappear
+        this.anims.create({
+            key: 'disappear',
+            frames: this.anims.generateFrameNumbers('player', { frames: [48, 49, 50] }),
+            frameRate: 10,
+            repeat: 0
+        });
+
+        // Row 8: Die
+        this.anims.create({
+            key: 'die',
+            frames: this.anims.generateFrameNumbers('player', { frames: [56, 57, 58, 59, 60, 61, 62, 63] }),
+            frameRate: 8,
+            repeat: 0
+        });
+
+        // Row 9: Attack
+        this.anims.create({
+            key: 'attack',
+            frames: this.anims.generateFrameNumbers('player', { frames: [64, 65, 66, 67, 68, 69, 70, 71] }),
+            frameRate: 12,
+            repeat: 0
+        });
+    }
+
     create () {
+        this.createAnimations();
         // Create the bordered level
         this.createWorld();
 
